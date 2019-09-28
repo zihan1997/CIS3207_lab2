@@ -1,0 +1,171 @@
+// struct to read a line
+struct commandLine{
+    char* commandName;
+    char** arg; // all arguments
+    int argCount; // the number of arguments
+    char* file; 
+    int inputMod;  // < or << read in
+    int outputMod; // > or >> write out
+    int background; // & at the end?
+    // for pip 
+    // NULL stands for no pip;
+    struct commandLine* one;
+}
+int main(){
+    // create a struct 
+    struct commandLine commandLine = NULL;
+    // get current dir
+    PWD = getcwd()
+
+    if batch.txt exists:
+        file = fopen("batch.txt", "r");
+        for line in file:
+            // parse lines in file
+            parseLine(line, &commandLine);
+            // execute it
+            executeCMD(commandLine);
+
+    else{
+        while true{
+
+            // read line
+            print myshell> 
+            char* line = read from user;
+
+            // parse it
+            commandLine = parseLine(line, &commandLine);
+
+            if commandLine.commandName == "cd"
+                mycd(commandLine, getcwd());
+            else if commandLine.commandName == "clr"
+                clear the screan
+            else if commandLine.commandName == "dir"
+                dir(commandLine);
+            else if commandLine.commandName == "environ"
+                print current user + home path + shell name + os type + hostname + dir finding environ;
+            else if commandLine.commandName == "echo"
+                for arg in commandLine.arg:
+                    print arg;
+            else if commandLine.commandName == "Help"
+                read the readme
+                for line in readme:
+                    print line;
+            else if commandLine.commandName == "pause"
+                puase until action occurs
+            else if commandLine.commandName == quit
+                break
+            else 
+                // other than that 8 internal commands
+                executeCMD()
+        }
+    } 
+
+}
+// <string.h>
+void parseLine(char* line, struct commandLine){
+    if | exists{
+        char* first = strtok(line, "|");
+        char* second = strtok(NULL, "|");
+        parseLine(second, commandLine);
+    }
+    if & exists at the end{
+
+        // change the background to true
+        commandLine.background = 1;
+
+        //delete "&"
+        line[len-1] = '\0';
+        parseLine(line, commandLine);
+    }
+    strtok by " "
+    for str in line strtok(line, " ")
+        add str to commandLine.argument
+}
+
+
+// <unistd.h>, fork, pip, dup2, execv
+// <fcntl.h>, open
+void executeCMD(struct commandLine){
+    if pip{
+        create pipe
+        create fork
+        child: write in pipe
+        parent: output the result
+    }
+    if background{
+        create fork
+        child does command
+    }
+    // read from file
+    if commandLine.inputMod{
+        //open file
+        int fd = open(commandLine.file, "O_RDONLY")
+
+        //redirect input from file;
+        dup2(fd, 0);
+        close fd;
+
+    }
+    if commandLine.outputMod{
+        //open file
+        int fd = open(commandLine.file, "O_WRONLY")
+
+        // redirect output to file
+        dup2(fd, 1);
+        close fd;
+    }
+    //else are built-in command
+    create fork
+    use execv to execute
+
+}
+
+// <unistd.h>, chdir. 
+void mycd(commandLine, PWD){
+    // read in the gloabal variable, PWD
+    // PWD set in main();
+
+    // no argument
+    if commandLine.argCount == 0{
+        // print current dir
+        print PWD;
+    }
+    
+    path = PWD + "/"+ commandLine.arg;
+    if path exists{
+        chdir(path);
+    }
+}
+
+// <unistd.h>, getcwd()
+// <sys/types.h> & <dirent.h>, opendir, readdir, closedir
+void dir(commandLine){
+    path = getcwd();
+    // arguments count <= 1
+
+    // more than 2 arguments
+    if commandLine.argCount >= 2{
+        perror;
+    }
+    // one argument
+    if commandLine.argCount == 1{
+        // check if it is relative path or absolute path
+        if relative path:
+            path = path+ "/"+ commandLine.arg[0];
+    }
+    // if no argument
+    // path = path
+
+    if path exists{
+        // open dir
+        dir = opendir(path);
+
+        // read dir
+        content = readdir(dir);
+        for each in cotent:
+            print each;
+
+        // close dir
+        closedir(dir);
+    }
+}
