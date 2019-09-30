@@ -7,6 +7,7 @@ struct commandLine{
     int inputMod;  // < or << read in
     int outputMod; // > or >> write out
     int background; // & at the end?
+    int parallel
     // for pip 
     // NULL stands for no pip;
     struct commandLine* one;
@@ -66,7 +67,7 @@ void parseLine(char* line, struct commandLine){
     if | exists{
         char* first = strtok(line, "|");
         char* second = strtok(NULL, "|");
-        parseLine(second, commandLine);
+        parseLine(second, commandLine.one);
     }
     if & exists at the end{
 
@@ -76,6 +77,13 @@ void parseLine(char* line, struct commandLine){
         //delete "&"
         line[len-1] = '\0';
         parseLine(line, commandLine);
+    }
+    -----------------------------------
+    if & in the middle{
+        for each in strtok(line, "&");
+            commandLine.parallel+=1;
+            // one is a linked list
+            paraline(each, commandLine.one);
     }
     strtok by " "
     for str in line strtok(line, " ")
