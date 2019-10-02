@@ -3,9 +3,8 @@
 
 struct commandLine
 {
-    char* commandName;
     char* arg[100]; // all arguments
-    int argCount; // the number of arguments
+    int argc; // the number of arguments
     char* file; 
     int inputMod;  // < or << read in
     int outputMod; // > or >> write out
