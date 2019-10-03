@@ -99,7 +99,12 @@ void my_echo(command* cmd){
         }
         printf("\n");
     }
+}
 
+void my_pause(){
+    while(getchar() != '\n'){
+        ;
+    }
 }
 
 int main(){
@@ -117,6 +122,7 @@ int main(){
     my_clr();
     // my_cd(&cmd);
     // my_dir(&cmd);
-    echo(&cmd);
+    // my_echo(&cmd);
+    my_pause();
     return 0;
 }

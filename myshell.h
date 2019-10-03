@@ -19,6 +19,12 @@ extern char* environ[];
 
 void mycd(command* cmd);
 void my_clr();
+void my_dir(command* cmd);
+void my_environ(command* cmd);
+void my_echo(command* cmd);
+void my_help();
+void my_pause();
+void my_quit();
 
 
 
