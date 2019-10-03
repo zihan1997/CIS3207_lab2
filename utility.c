@@ -1,9 +1,32 @@
 #include "myshell.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
 #include <dirent.h>
+
+char** parsePipe(char* line){
+    char* line_dup = strdup(line);
+    // store parsed line by |
+    char** line1 = malloc(2*sizeof(line));
+
+    char* token = NULL;
+    token = strtok(line_dup, "|");
+    if(token != NULL){
+        // strcpy(*(line1), token);
+        line1[0] = strdup(token);
+    }
+    token = strtok(NULL, "|");
+    if(token != NULL){
+        // strcpy(*(line1+1), token);
+        line1[1] = strdup(token);
+    }
+    free(line_dup);
+    return line1;
+}
+
+void parseLine(char* line, struct commandLine);
 
 // check if the dir is absolute or relative
 int checkDir(char* path){
@@ -100,11 +123,16 @@ void my_echo(command* cmd){
         printf("\n");
     }
 }
+void my_help();
 
 void my_pause(){
     while(getchar() != '\n'){
         ;
     }
+}
+
+void my_quit(){
+    ;
 }
 
 int main(){
@@ -123,6 +151,10 @@ int main(){
     // my_cd(&cmd);
     // my_dir(&cmd);
     // my_echo(&cmd);
-    my_pause();
+    // my_pause();
+    char* x = "1|2";
+    char** line1 = parsePipe(x);
+
+    printf("%s\t%s\n", line1[0], line1[1]);
     return 0;
 }
