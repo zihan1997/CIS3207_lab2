@@ -1,6 +1,6 @@
 #ifndef MYSHELL_H_
 #define MYSHELL_H_
-#include "utility.c"
+// #include "utility.c"
 
 struct commandLine
 {
@@ -18,6 +18,7 @@ typedef struct commandLine command;
 extern char* environ[];
 
 void mycd(command* cmd);
+void my_clr();
 
 
 
