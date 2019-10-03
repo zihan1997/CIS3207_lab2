@@ -84,11 +84,28 @@ void my_dir(command* cmd){
     closedir(dir);
     
 }
+void my_environ(command* cmd){
+    ;
+}
+
+void echo(command* cmd){
+    // there is only command name without arguments
+    if(cmd->argc == 1){
+        // print out spaces in the line
+        puts("");
+    }else{
+        for(int i = 1; i <= cmd->argc && cmd->arg[i] != NULL; i++){
+            printf("%s ", cmd->arg[i]);
+        }
+        printf("\n");
+    }
+
+}
 
 int main(){
     command cmd;
-    cmd.arg[0] = "dir";
-    cmd.arg[1] = "";
+    cmd.arg[0] = "echo";
+    cmd.arg[1] = ",,";
     cmd.arg[2] = NULL;
     cmd.argc = 2;
     cmd.background = 0;
@@ -99,6 +116,7 @@ int main(){
     cmd.one = NULL;
     my_clr();
     // my_cd(&cmd);
-    my_dir(&cmd);
+    // my_dir(&cmd);
+    echo(&cmd);
     return 0;
 }
