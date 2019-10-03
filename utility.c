@@ -88,7 +88,7 @@ void my_environ(command* cmd){
     ;
 }
 
-void echo(command* cmd){
+void my_echo(command* cmd){
     // there is only command name without arguments
     if(cmd->argc == 1){
         // print out spaces in the line
