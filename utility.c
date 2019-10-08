@@ -106,6 +106,18 @@ void parseParallel(command* cmd, char* line){
     char* saveptr;
     char* token;
     token = strtok_r(line_dup, "&", &saveptr);
+    printf("token: %-10s saveptr: %s\n", token, saveptr);
+    
+    if(token != NULL){
+        cmd->parallel = 1;
+        parseSpaces(cmd, token);
+    }
+
+    if(saveptr != NULL){
+        cmd->one = malloc(sizeof(command));
+        initialize(cmd->one);
+        parseSpaces(cmd->one, saveptr);
+    }
     
 }
 
@@ -293,7 +305,7 @@ int main(){
     // parseParallel(&cmd, line);
     command cmd1;
     printf("\n\n\n\n\nBEGIN\n");
-    char line[100] = "cd 1|ls -a";
+    char line[100] = "cd 1&ls -a";
     parseLine(&cmd1, line);
     // parseParallel(&cmd1, line);
     printCommand(&cmd1);
