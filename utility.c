@@ -6,27 +6,146 @@
 #include <string.h>
 #include <dirent.h>
 
-char** parsePipe(char* line){
-    char* line_dup = strdup(line);
-    // store parsed line by |
-    char** line1 = malloc(2*sizeof(line));
+// initialize the struct
+void initialize(command* cmd){
+    cmd->arg[0] = NULL;
+    cmd->argc = 0;
+    cmd->background = 0;
+    cmd->file = NULL;
+    cmd->inputMod = 0;
+    cmd->outputMod = 0;
+    cmd->parallel = 0;
+    cmd->pipe = 0;
+    cmd->one = NULL;
+}
+void printCommand(command* cmd){
+    printf("---------\nargs: ");
+    for(int i = 0; i < cmd->argc && cmd->arg[i] != NULL; i++){
+        printf("%s ", cmd->arg[i]);
+    }
+    puts("");
+    printf("argc: %d\nfilename: %s\ninput: %d\noutput: %d\nbackground: %d\nparallel: %d\npipe:%d\n",
+                                                                                    cmd->argc, 
+                                                                                    cmd->file, 
+                                                                                    cmd->inputMod, 
+                                                                                    cmd->outputMod, 
+                                                                                    cmd->background, 
+                                                                                    cmd->parallel, 
+                                                                                    cmd->pipe);
 
-    char* token = NULL;
-    token = strtok(line_dup, "|");
-    if(token != NULL){
-        // strcpy(*(line1), token);
-        line1[0] = strdup(token);
+    // linked command
+    if(cmd->one == NULL){
+        printf("\nEND\n");
+    }else{// cmd->one != NULL
+        printCommand(cmd->one);
     }
-    token = strtok(NULL, "|");
-    if(token != NULL){
-        // strcpy(*(line1+1), token);
-        line1[1] = strdup(token);
-    }
-    free(line_dup);
-    return line1;
 }
 
-void parseLine(char* line, struct commandLine);
+void parsePipe(command* cmd, char* line){
+    // 1. new string
+    char* line_dup = strdup(line);
+    // 2. change cmd.parallel
+    cmd->pipe = 1;
+
+    // tokenize string twice
+    char* token = NULL;
+    char* saveptr;
+    token = strtok_r(line_dup, "|", &saveptr);
+
+    // check if tokens are NULL
+    if(token != NULL){
+        cmd->pipe = 1;
+        parseSpaces(cmd, token);
+    }
+
+    if(saveptr != NULL){
+        cmd->one = malloc(sizeof(command));
+        initialize(cmd->one);
+        parseSpaces(cmd->one, saveptr);
+    }
+}
+
+// commandName arg1 arg2
+void parseSpaces(command* cmd, char* line){
+    printf("the line is:%s\n", line);
+    char* line_dup = strdup(line);
+    char* token = NULL;
+    char* saveptr;
+
+    int index = 0;
+    token = strtok_r(line_dup, " ", &saveptr);
+    while(token != NULL){
+        cmd->arg[index] = strdup(token);
+        printf("%d\t%s\n", index, cmd->arg[index]);
+        index+=1;
+        token = strtok_r(NULL, " ", &saveptr);
+    }
+    cmd->argc = index;
+    cmd->arg[index] = NULL;
+    free(line_dup);
+}
+
+
+void parseBackground(command* cmd, char* line){
+    cmd->background = 1;
+    char* ptr = line;
+    int index = 0;
+    while( *(ptr+index) != '\0' ){
+        if(*(ptr+index) == '&'){
+            *(ptr+index) = '\0';
+        }
+        index+=1;
+    }
+    puts(line);
+    parseSpaces(cmd, line);
+}
+
+void parseParallel(command* cmd, char* line){
+    // create new string
+    char* line_dup = strdup(line);
+    char* saveptr;
+    char* token;
+    token = strtok_r(line_dup, "&", &saveptr);
+    
+}
+
+void parseLine(command* cmd, char* line){
+    // 1. initialize cmd struct
+    initialize(cmd);
+
+    // 2. parse the line
+
+    // a. gain # of |, &
+    int pipeNum = 0;
+    int paraNum = 0;
+    for(char* ptr = line;*ptr != '\0'; ptr+=1 ){
+        
+        // 1. | exits
+        if(*ptr == '|'){
+            puts("find |");
+            parsePipe(cmd, line);
+            return;
+        }else if(*ptr == '&' && *(ptr+1) != '\0'){
+        // 2. & in the middle
+            puts("find & in the middle");
+            parseParallel(cmd, line);
+            return;
+        }else if(*ptr == '&' && *(ptr+1) == '\0' ){
+        // 3. & at the end
+            puts("find | at the end");
+            parseBackground(cmd, line);
+            return;
+        }else if(*(ptr+1) == '\0'){
+            puts("no delimitor");
+            parseSpaces(cmd, line);
+            return;
+        }else{
+            // go for loop again
+            ;
+        }
+
+    }
+}
 
 // check if the dir is absolute or relative
 int checkDir(char* path){
@@ -147,14 +266,36 @@ int main(){
     cmd.outputMod = 0;
     cmd.parallel = 0;
     cmd.one = NULL;
+    cmd.pipe = 0;
+
+    command cmd3;
+    cmd3.arg[0] = "cd";
+    cmd3.arg[1] = "xx";
+    cmd3.arg[2] = NULL;
+    cmd3.argc = 2;
+    cmd3.background = 0;
+    cmd3.file = NULL;
+    cmd3.inputMod = 0;
+    cmd3.outputMod = 0;
+    cmd3.parallel = 0;
+    cmd3.one = NULL;
+    cmd3.pipe = 0;
     my_clr();
     // my_cd(&cmd);
     // my_dir(&cmd);
     // my_echo(&cmd);
     // my_pause();
-    char* x = "1|2";
-    char** line1 = parsePipe(x);
-
-    printf("%s\t%s\n", line1[0], line1[1]);
+    // char* x = "1|2";
+    // char** line1 = parsePipe(x, &cmd);
+    // printf("%s\t%s\n", line1[0], line1[1]);
+    // parseSpaces(&cmd, "cd 1");
+    // parsePipe(&cmd1, line);
+    // parseParallel(&cmd, line);
+    command cmd1;
+    printf("\n\n\n\n\nBEGIN\n");
+    char line[100] = "cd 1|ls -a";
+    parseLine(&cmd1, line);
+    // parseParallel(&cmd1, line);
+    printCommand(&cmd1);
     return 0;
 }
