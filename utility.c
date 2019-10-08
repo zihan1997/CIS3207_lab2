@@ -19,7 +19,7 @@ void initialize(command* cmd){
     cmd->one = NULL;
 }
 void printCommand(command* cmd){
-    printf("---------\nargs: ");
+    printf("\nargs: ");
     for(int i = 0; i < cmd->argc && cmd->arg[i] != NULL; i++){
         printf("%s ", cmd->arg[i]);
     }
@@ -35,7 +35,8 @@ void printCommand(command* cmd){
 
     // linked command
     if(cmd->one == NULL){
-        printf("\nEND\n");
+        puts("");
+        // printf("\n--------------------END\n");
     }else{// cmd->one != NULL
         printCommand(cmd->one);
     }
@@ -67,7 +68,7 @@ void parsePipe(command* cmd, char* line){
 
 // commandName arg1 arg2
 void parseSpaces(command* cmd, char* line){
-    printf("the line is:%s\n", line);
+    // printf("the line is:%s\n", line);
     char* line_dup = strdup(line);
     char* token = NULL;
     char* saveptr;
@@ -76,7 +77,7 @@ void parseSpaces(command* cmd, char* line){
     token = strtok_r(line_dup, " ", &saveptr);
     while(token != NULL){
         cmd->arg[index] = strdup(token);
-        printf("%d\t%s\n", index, cmd->arg[index]);
+        // printf("%d\t%s\n", index, cmd->arg[index]);
         index+=1;
         token = strtok_r(NULL, " ", &saveptr);
     }
@@ -106,7 +107,7 @@ void parseParallel(command* cmd, char* line){
     char* saveptr;
     char* token;
     token = strtok_r(line_dup, "&", &saveptr);
-    printf("token: %-10s saveptr: %s\n", token, saveptr);
+    // printf("token: %-10s saveptr: %s\n", token, saveptr);
     
     if(token != NULL){
         cmd->parallel = 1;
@@ -120,7 +121,75 @@ void parseParallel(command* cmd, char* line){
     }
     
 }
+// redirection
+// 2 for "<<"
+// 1 for "<"
+void input_redirection(command* cmd, char* line){
+    // initialize cmd
+    initialize(cmd);
+    
+    // duplicate of line
+    char* line_dup = strdup(line);
+    
+    // tokenize line_dup
+    char* saveptr;
+    char* token;
+    token = strtok_r(line_dup, "<", &saveptr);
+    if(token != NULL){
+        // printf("token: %s\n", token);
+        parseSpaces(cmd, token);
+    }
+    if(saveptr != NULL){
+        // "<<"
+        if(*saveptr == '<'){
+            cmd->inputMod = 2;
+            saveptr = saveptr+1;
+        // "<"
+        }else{
+            cmd->inputMod = 1;
+        }
+        // printf("saveptr: %s\n", saveptr);
+        while(*saveptr == ' '){
+            saveptr+=1;
+        }
+        cmd->file = strdup(saveptr);
+    }
+}
 
+// redirection
+// 2 for ">>"
+// 1 for ">"
+void output_redirection(command* cmd, char* line){
+    // initialize cmd
+    initialize(cmd);
+    
+    // duplicate of line
+    char* line_dup = strdup(line);
+    
+    // tokenize line_dup
+    char* saveptr;
+    char* token;
+    token = strtok_r(line_dup, ">", &saveptr);
+    if(token != NULL){
+        // printf("token: %s\n", token);
+        parseSpaces(cmd, token);
+    }
+    if(saveptr != NULL){
+        // ">>"
+        if(*saveptr == '>'){
+            cmd->outputMod = 2;
+            saveptr = saveptr+1;
+        // "<"
+        }else{
+            cmd->outputMod = 1;
+        }
+        // printf("saveptr: %s\n", saveptr);
+        while(*saveptr == ' '){
+            saveptr+=1;
+        }
+        cmd->file = strdup(saveptr);
+    }
+}
 void parseLine(command* cmd, char* line){
     // 1. initialize cmd struct
     initialize(cmd);
@@ -134,22 +203,28 @@ void parseLine(command* cmd, char* line){
         
         // 1. | exits
         if(*ptr == '|'){
-            puts("find |");
+            // puts("find |");
             parsePipe(cmd, line);
             return;
         }else if(*ptr == '&' && *(ptr+1) != '\0'){
         // 2. & in the middle
-            puts("find & in the middle");
+            // puts("find & in the middle");
             parseParallel(cmd, line);
             return;
         }else if(*ptr == '&' && *(ptr+1) == '\0' ){
         // 3. & at the end
-            puts("find | at the end");
+            // puts("find | at the end");
             parseBackground(cmd, line);
             return;
         }else if(*(ptr+1) == '\0'){
-            puts("no delimitor");
+            // puts("no delimitor");
             parseSpaces(cmd, line);
+            return;
+        }else if(*ptr == '<'){
+            input_redirection(cmd, line);
+            return;
+        }else if(*ptr == '>'){
+            output_redirection(cmd, line);
             return;
         }else{
             // go for loop again
@@ -266,48 +341,50 @@ void my_quit(){
     ;
 }
 
-int main(){
-    command cmd;
-    cmd.arg[0] = "echo";
-    cmd.arg[1] = ",,";
-    cmd.arg[2] = NULL;
-    cmd.argc = 2;
-    cmd.background = 0;
-    cmd.file = NULL;
-    cmd.inputMod = 0;
-    cmd.outputMod = 0;
-    cmd.parallel = 0;
-    cmd.one = NULL;
-    cmd.pipe = 0;
+// int main(){
+//     command cmd;
+//     cmd.arg[0] = "echo";
+//     cmd.arg[1] = ",,";
+//     cmd.arg[2] = NULL;
+//     cmd.argc = 2;
+//     cmd.background = 0;
+//     cmd.file = NULL;
+//     cmd.inputMod = 0;
+//     cmd.outputMod = 0;
+//     cmd.parallel = 0;
+//     cmd.one = NULL;
+//     cmd.pipe = 0;
 
-    command cmd3;
-    cmd3.arg[0] = "cd";
-    cmd3.arg[1] = "xx";
-    cmd3.arg[2] = NULL;
-    cmd3.argc = 2;
-    cmd3.background = 0;
-    cmd3.file = NULL;
-    cmd3.inputMod = 0;
-    cmd3.outputMod = 0;
-    cmd3.parallel = 0;
-    cmd3.one = NULL;
-    cmd3.pipe = 0;
-    my_clr();
-    // my_cd(&cmd);
-    // my_dir(&cmd);
-    // my_echo(&cmd);
-    // my_pause();
-    // char* x = "1|2";
-    // char** line1 = parsePipe(x, &cmd);
-    // printf("%s\t%s\n", line1[0], line1[1]);
-    // parseSpaces(&cmd, "cd 1");
-    // parsePipe(&cmd1, line);
-    // parseParallel(&cmd, line);
-    command cmd1;
-    printf("\n\n\n\n\nBEGIN\n");
-    char line[100] = "cd 1&ls -a";
-    parseLine(&cmd1, line);
+//     command cmd3;
+//     cmd3.arg[0] = "cd";
+//     cmd3.arg[1] = "xx";
+//     cmd3.arg[2] = NULL;
+//     cmd3.argc = 2;
+//     cmd3.background = 0;
+//     cmd3.file = NULL;
+//     cmd3.inputMod = 0;
+//     cmd3.outputMod = 0;
+//     cmd3.parallel = 0;
+//     cmd3.one = NULL;
+//     cmd3.pipe = 0;
+//     my_clr();
+//     // my_cd(&cmd);
+//     // my_dir(&cmd);
+//     // my_echo(&cmd);
+//     // my_pause();
+//     // char* x = "1|2";
+//     // char** line1 = parsePipe(x, &cmd);
+//     // printf("%s\t%s\n", line1[0], line1[1]);
+//     // parseSpaces(&cmd, "cd 1");
+//     // parsePipe(&cmd1, line);
+//     // parseParallel(&cmd, line);
+    // command cmd1;
+//     printf("\n\n\n\n\nBEGIN\n");
+    // char line[100] = "cd>>x.txt";
+    // parseLine(&cmd1, line);
     // parseParallel(&cmd1, line);
-    printCommand(&cmd1);
-    return 0;
-}
+    // output_redirection(&cmd1, line);
+    // input_redirection(&cmd1, line);
+    // printCommand(&cmd1);
+    // return 0;
+// }
