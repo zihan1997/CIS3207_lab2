@@ -19,6 +19,7 @@ typedef struct commandLine command;
 extern char* environ[];
 
 void initialize(command* cmd);
+void freeStruct(command* cmd);
 void printCommand(command* cmd);
 void parsePipe(command* cmd, char* line);
 void parseSpaces(command* cmd, char* line);
