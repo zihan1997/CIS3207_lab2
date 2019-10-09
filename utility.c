@@ -18,6 +18,23 @@ void initialize(command* cmd){
     cmd->pipe = 0;
     cmd->one = NULL;
 }
+
+// free everything in struct
+void freeStruct(command* cmd){
+    for(int i = 0; i < cmd->argc; i++){
+        free(cmd->arg[i]);
+    }
+    free(cmd->file);
+    
+    command* cmd1;
+    command* one = cmd->one;
+    while(one != NULL){
+        cmd1 = one;
+        one = one->one;
+        free(cmd1);
+    }
+}
+
 void printCommand(command* cmd){
     printf("\nargs: ");
     for(int i = 0; i < cmd->argc && cmd->arg[i] != NULL; i++){
@@ -196,9 +213,9 @@ void parseLine(command* cmd, char* line){
 
     // 2. parse the line
 
-    // a. gain # of |, &
-    int pipeNum = 0;
-    int paraNum = 0;
+    // // a. gain # of |, &
+    // int pipeNum = 0;
+    // int paraNum = 0;
     for(char* ptr = line;*ptr != '\0'; ptr+=1 ){
         
         // 1. | exits
@@ -314,7 +331,11 @@ void my_dir(command* cmd){
     
 }
 void my_environ(command* cmd){
-    ;
+    int i =0;
+    while(environ[i] != NULL){
+        printf("%s\n", environ[i]);
+        i+=1;
+    }
 }
 
 void my_echo(command* cmd){
@@ -329,7 +350,18 @@ void my_echo(command* cmd){
         printf("\n");
     }
 }
-void my_help();
+void my_help(){
+    char* filename = "/Users/Zihan1997/Documents/Temple CS Class/CIS-3207/Proj2/readme";
+    FILE* fptr = fopen(filename, "r");
+    char c;
+    c = fgetc(fptr);
+    while(c != EOF){
+        printf("%c", c);
+        c = fgetc(fptr);
+    }
+    fclose(fptr);
+    puts("");
+}
 
 void my_pause(){
     while(getchar() != '\n'){
@@ -338,53 +370,11 @@ void my_pause(){
 }
 
 void my_quit(){
-    ;
+    exit(EXIT_SUCCESS);
 }
 
-// int main(){
-//     command cmd;
-//     cmd.arg[0] = "echo";
-//     cmd.arg[1] = ",,";
-//     cmd.arg[2] = NULL;
-//     cmd.argc = 2;
-//     cmd.background = 0;
-//     cmd.file = NULL;
-//     cmd.inputMod = 0;
-//     cmd.outputMod = 0;
-//     cmd.parallel = 0;
-//     cmd.one = NULL;
-//     cmd.pipe = 0;
-
-//     command cmd3;
-//     cmd3.arg[0] = "cd";
-//     cmd3.arg[1] = "xx";
-//     cmd3.arg[2] = NULL;
-//     cmd3.argc = 2;
-//     cmd3.background = 0;
-//     cmd3.file = NULL;
-//     cmd3.inputMod = 0;
-//     cmd3.outputMod = 0;
-//     cmd3.parallel = 0;
-//     cmd3.one = NULL;
-//     cmd3.pipe = 0;
-//     my_clr();
-//     // my_cd(&cmd);
-//     // my_dir(&cmd);
-//     // my_echo(&cmd);
-//     // my_pause();
-//     // char* x = "1|2";
-//     // char** line1 = parsePipe(x, &cmd);
-//     // printf("%s\t%s\n", line1[0], line1[1]);
-//     // parseSpaces(&cmd, "cd 1");
-//     // parsePipe(&cmd1, line);
-//     // parseParallel(&cmd, line);
-    // command cmd1;
-//     printf("\n\n\n\n\nBEGIN\n");
-    // char line[100] = "cd>>x.txt";
-    // parseLine(&cmd1, line);
-    // parseParallel(&cmd1, line);
-    // output_redirection(&cmd1, line);
-    // input_redirection(&cmd1, line);
-    // printCommand(&cmd1);
-    // return 0;
-// }
+int main(int argc, char const *argv[])
+{
+    my_help();
+    return 0;
+}
