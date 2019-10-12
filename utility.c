@@ -296,34 +296,35 @@ void my_clr(){
     printf("\033[H\033[2J");
 }
 void my_dir(command* cmd){
+    // argc <= 2
     if(cmd->argc > 2){
         puts("Only one argument is allowed.");
         return;
     }
     // get current dir
     char PWD[PATH_MAX];
-    getcwd(PWD, sizeof(PWD));
+    if(getcwd(PWD, sizeof(PWD)) == NULL){
+        perror("cannot get current dir");
+        return;
+    }
     char filePath[PATH_MAX] = "";
 
-    // no argument, act as ls
+    // check whether argc is 1 or 2
     if(cmd->argc == 1){
         // filePath = strdup(PWD);
         strcat(filePath, PWD);
-    }
-    // relative path
-    if(!checkDir(cmd->arg[1])){
-        // pwd + relative path
-        strcat(filePath, PWD);
-        strcat(filePath, "/");
+    }else{
         strcat(filePath, cmd->arg[1]);
     }
+    // open dir
     DIR* dir = opendir(filePath);
+    // return error if error
     if(dir == NULL){
         perror("open file failed");
         return;
     }
     struct dirent* dirInfo = NULL;
-    
+    // read item in the dir
     while((dirInfo = readdir(dir) )!= NULL){
         printf("%s\n", dirInfo->d_name);
     }
@@ -332,7 +333,7 @@ void my_dir(command* cmd){
 }
 void my_environ(command* cmd){
     int i =0;
-    while(environ[i] != NULL){
+    while(environ[i] != 0){
         printf("%s\n", environ[i]);
         i+=1;
     }
@@ -373,8 +374,15 @@ void my_quit(){
     exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char const *argv[])
-{
-    my_help();
-    return 0;
-}
+// int main(int argc, char const *argv[])
+// {
+//     // getchar();
+//     // my_quit();
+//     // getchar();
+//     command cmd;
+//     initialize(&cmd);
+//     char line[100] = "cd ..";
+//     parseSpaces(&cmd, line);
+//     my_environ(&cmd);
+//     return 0;
+// }
