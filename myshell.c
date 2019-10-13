@@ -145,6 +145,7 @@ void executeSingleCommand(command* cmd){
 }
 void run_shell_pip(command* cmd){
     if(cmd->background != 0){
+        // printf("background\n");
         pid_t childPID = fork();
         if(childPID < 0){
             printf("fork failed\n");
@@ -157,6 +158,7 @@ void run_shell_pip(command* cmd){
             executeSingleCommand(cmd);
         }
     }else if(cmd->pipe != 0){
+        // printf("pipe\n");
         // make sure there are two commands
         if(cmd->one != NULL){
             int pfds[2];
@@ -186,6 +188,9 @@ void run_shell_pip(command* cmd){
                 }
             }
         }
+    }else{
+        // printf("single\n");
+        executeSingleCommand(cmd);
     }
 }
 
@@ -200,12 +205,12 @@ int main(int argc, char const *argv[], char* envp[])
     
     command cmd;
     initialize(&cmd);
-    // char line[100] = "ls -l|wc -l ";
+    char line[100] = "ls -l|wc -l ";
     // char line[100] = "ps|grep root&";
-    char line[100] = "dir";
+    // char line[100] = "dir>a.txt";
     parseLine(&cmd, line);
     printCommand(&cmd);
     // executeSingleCommand(&cmd);
-    // run_shell_pip(&cmd);
+    run_shell_pip(&cmd);
     return 0;
 }
