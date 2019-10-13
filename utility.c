@@ -24,7 +24,9 @@ void freeStruct(command* cmd){
     for(int i = 0; i < cmd->argc; i++){
         free(cmd->arg[i]);
     }
-    free(cmd->file);
+    if(cmd->file){
+        free(cmd->file);
+    }
     
     command* cmd1;
     command* one = cmd->one;
@@ -114,7 +116,6 @@ void parseBackground(command* cmd, char* line){
         }
         index+=1;
     }
-    puts(line);
     parseSpaces(cmd, line);
 }
 
@@ -230,7 +231,7 @@ void parseLine(command* cmd, char* line){
             return;
         }else if(*ptr == '&' && *(ptr+1) == '\0' ){
         // 3. & at the end
-            // puts("find | at the end");
+            // puts("-------find | at the end");
             parseBackground(cmd, line);
             return;
         }else if(*(ptr+1) == '\0'){
@@ -331,9 +332,11 @@ void my_dir(command* cmd){
     closedir(dir);
     
 }
-void my_environ(command* cmd){
+
+extern char **environ;
+void my_environ(){
     int i =0;
-    while(environ[i] != 0){
+    while(environ[i] != NULL){
         printf("%s\n", environ[i]);
         i+=1;
     }
