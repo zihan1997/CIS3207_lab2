@@ -4,47 +4,63 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-int main(int argc, char const *argv[], char* envp[])
-{
-    // 1, get current dir
-    environ = envp;
-    char PWD[PATH_MAX];
-    if(getcwd(PWD, sizeof(PWD)) == NULL){
-        perror("cannot get current dir");
-        return 1;
-    }
-    // 2. set shell environment
-    setenv("shell", PWD, 1);
-    // 3. create new command
-    command cmd;
-    // 4. initialize struct
-    initialize(&cmd);
-    // 5. get line
-    char* line = NULL;
-    size_t size;
+// int main(int argc, char const *argv[], char* envp[])
+// {
+//     // 1, get current dir
+//     environ = envp;
+//     char PWD[PATH_MAX];
+//     if(getcwd(PWD, sizeof(PWD)) == NULL){
+//         perror("cannot get current dir");
+//         return 1;
+//     }
+//     // 2. set shell environment
+//     setenv("shell", PWD, 1);
+//     // 3. create new command
+//     command cmd;
+//     // 4. initialize struct
+//     initialize(&cmd);
+//     // 5. get line
+//     char* line = NULL;
+//     size_t size;
 
-    while(1){
-        // if(getcwd(PWD, sizeof(PWD)) != NULL){
+//     // batch mode
+//     FILE* batch = stdin;
+//     if(argc == 2){
+//         batch = fopen(argv[1], "r");
+//         if( batch == NULL){
+//             perror("open file failed");
+//             return EXIT_FAILURE;
+//         }
+//     }
+//     while(1){
+//         // if(getcwd(PWD, sizeof(PWD)) != NULL){
             
-        // }
+//         // }
+//         if(batch == stdin){
+//             printf("myshell> ");
+//         }
+//         int len = getline(&line, &size, batch);
+//         if(len > 0){
+//             // remove \n or \r at the end
+//             while (len > 0 && (line[len - 1] == '\n' || line[len-1] == '\r')) {
+//                 line[len-1] = '\0';
+//                 len -= 1;
+//             }
+//             parseLine(&cmd, line);
+//             if( strcmp(cmd.arg[0], "quit") == 0 ){
+//                 break;
+//             } 
+//             printCommand(&cmd);
+//             run_shell_pip(&cmd);
+//         }else{
+//             // line is empty
+//             continue;
+//         }
+//     }
 
-        printf("myshell> ");
-        int len = getline(&line, &size, stdin);
-        // remove \n or \r at the end
-        while (len > 0 && (line[len - 1] == '\n' || line[len-1] == '\r')) {
-            line[len-1] = '\0';
-            len -= 1;
-        }
-        parseLine(&cmd, line);
-        if( strcmp(cmd.arg[0], "quit") == 0 ){
-            freeStruct(&cmd);
-            break;
-        } 
-        // printCommand(&cmd);
-        run_shell_pip(&cmd);
-    }
-    return 0;
-}
+//     freeStruct(&cmd);
+//     return 0;
+// }
 
 // single internal commands
 int runInternalCmd(command* cmd){
@@ -116,10 +132,13 @@ void executeSingleCommand(command* cmd){
         }else{
             // do execvp
             // input/output redirections
-            int fd;
+            int fd = 0;
             int oflag;
-            // 1. input redirection
+            // // 1. both input and output
+            // if(cmd->inputMod != 0 && cmd->)
+            // 2. input redirection
             if(cmd->inputMod != 0){
+                puts("input");
                 oflag = O_RDONLY;
                 fd = open(cmd->file, oflag);
                 // error happens
@@ -132,8 +151,9 @@ void executeSingleCommand(command* cmd){
                 }
             }
             if(cmd->outputMod != 0){
-            // 2. output redirection
-                oflag = O_CREAT|O_WRONLY;
+                puts("output");
+            // 3. output redirection
+                oflag |= O_CREAT|O_WRONLY;
                 // command has >>
                 if(cmd->outputMod == 2){
                     // append
@@ -141,7 +161,12 @@ void executeSingleCommand(command* cmd){
                 }else{
                     oflag |= O_TRUNC;
                 }
-                fd = open(cmd->file, oflag, S_IRWXU);
+                if(cmd->inputMod != 0){
+                    fd = open(cmd->one->file, oflag, S_IRWXU);
+                }else{
+
+                    fd = open(cmd->file, oflag, S_IRWXU);
+                }
                 if(fd == -1){
                     printf("Cannot open file\n");
                     return;
@@ -213,25 +238,26 @@ void run_shell_pip(command* cmd){
     }
 }
 
-// int main(int argc, char const *argv[], char* envp[])
-// {
-//     environ = envp;
-//     char PWD[PATH_MAX];
-//     if(getcwd(PWD, sizeof(PWD)) == NULL){
-//         perror("cannot get current dir");
-//         return 1;
-//     }
-//     // set shell environment
-//     setenv("shell", PWD, 1);
+int main(int argc, char const *argv[], char* envp[])
+{
+    environ = envp;
+    char PWD[PATH_MAX];
+    if(getcwd(PWD, sizeof(PWD)) == NULL){
+        perror("cannot get current dir");
+        return 1;
+    }
+    // set shell environment
+    setenv("shell", PWD, 1);
     
-//     command cmd;
-//     initialize(&cmd);
-//     // char line[100] = "ls -l|wc -l ";
-//     // char line[100] = "ps|grep root&";
-//     char line[100] = "ls&";
-//     parseLine(&cmd, line);
-//     printCommand(&cmd);
-//     // executeSingleCommand(&cmd);
-//     run_shell_pip(&cmd);
-//     return 0;
-// }
+    command cmd;
+    initialize(&cmd);
+    // char line[100] = "ls -l|wc -l ";
+    // char line[100] = "ps|grep root&";
+    char line[100] = "wc<pseudocode.txt>>a.txt";
+    // char line[100] = "ls -a";
+    parseLine(&cmd, line);
+    printCommand(&cmd);
+    executeSingleCommand(&cmd);
+    // run_shell_pip(&cmd);
+    return 0;
+}
