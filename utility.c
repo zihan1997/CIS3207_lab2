@@ -143,8 +143,6 @@ void parseParallel(command* cmd, char* line){
 // 2 for "<<"
 // 1 for "<"
 void input_redirection(command* cmd, char* line){
-    // initialize cmd
-    initialize(cmd);
     
     // duplicate of line
     char* line_dup = strdup(line);
@@ -162,9 +160,6 @@ void input_redirection(command* cmd, char* line){
         if(*saveptr == '<'){
             cmd->inputMod = 2;
             saveptr = saveptr+1;
-        // "<"
-        }else{
-            cmd->inputMod = 1;
         }
         // printf("saveptr: %s\n", saveptr);
         while(*saveptr == ' '){
@@ -178,8 +173,6 @@ void input_redirection(command* cmd, char* line){
 // 2 for ">>"
 // 1 for ">"
 void output_redirection(command* cmd, char* line){
-    // initialize cmd
-    initialize(cmd);
     
     // duplicate of line
     char* line_dup = strdup(line);
@@ -193,13 +186,10 @@ void output_redirection(command* cmd, char* line){
         parseSpaces(cmd, token);
     }
     if(saveptr != NULL){
-        // ">>"
+        // check if it is ">>"
         if(*saveptr == '>'){
             cmd->outputMod = 2;
             saveptr = saveptr+1;
-        // "<"
-        }else{
-            cmd->outputMod = 1;
         }
         // printf("saveptr: %s\n", saveptr);
         while(*saveptr == ' '){
@@ -207,17 +197,57 @@ void output_redirection(command* cmd, char* line){
         }
         cmd->file = strdup(saveptr);
     }
+    free(line_dup);
+}
+// commandname arg1 < inputfile > outfile
+void input_output_redirection(command* cmd, char* line){
+    cmd->one = malloc(sizeof(command));
+    initialize(cmd->one);
+
+    char* line_dup = strdup(line);
+    char* saveptr;
+    char* token = strtok_r(line_dup, "<", &saveptr);
+    if(token != NULL){
+        // printf("token: %s\n", token);
+        parseSpaces(cmd, token);
+    }
+    if(saveptr != NULL){
+        if(*(saveptr) == '<'){
+            cmd->inputMod = 2;
+            saveptr+=1;
+        }else{
+            cmd->inputMod = 1;
+        }
+    }
+    // input file
+    char* token1 = strtok_r(NULL, ">", &saveptr);
+    if(token1 != NULL){
+        // printf("input file: %s\n", token1);
+        cmd->file = strdup(token1);
+    }
+    
+    // outputfile
+    if(saveptr != NULL){
+        if(*(saveptr) == '>'){
+            saveptr+=1;
+            cmd->one->outputMod = 2;
+        }else{
+            cmd->one->outputMod = 1;
+        }
+        // printf("outfile: %s\n", saveptr);
+        cmd->one->file = strdup(saveptr);
+    }
+    
+    
 }
 void parseLine(command* cmd, char* line){
     // 1. initialize cmd struct
     initialize(cmd);
 
     // 2. parse the line
-
-    // // a. gain # of |, &
-    // int pipeNum = 0;
-    // int paraNum = 0;
-    for(char* ptr = line;*ptr != '\0'; ptr+=1 ){
+    int inputMod = 0;
+    int outputMod = 0;
+    for(char* ptr = line; *ptr != '\0'; ptr+=1 ){
         
         // 1. | exits
         if(*ptr == '|'){
@@ -234,21 +264,39 @@ void parseLine(command* cmd, char* line){
             // puts("-------find | at the end");
             parseBackground(cmd, line);
             return;
-        }else if(*(ptr+1) == '\0'){
-            // puts("no delimitor");
-            parseSpaces(cmd, line);
-            return;
         }else if(*ptr == '<'){
-            input_redirection(cmd, line);
-            return;
+            // input_redirection(cmd, line);
+            inputMod = 1;
+            // return;
         }else if(*ptr == '>'){
-            output_redirection(cmd, line);
-            return;
+            // output_redirection(cmd, line);
+            outputMod = 1;
+            // return;
         }else{
             // go for loop again
             ;
         }
 
+    }
+    // both < and > 
+    if(inputMod == 1 && outputMod == 1){
+        input_output_redirection(cmd, line);
+        return;
+
+    // only <
+    }else if(inputMod == 1){
+        input_redirection(cmd, line);
+        return;
+
+    // only >
+    }else if(outputMod == 1){
+        output_redirection(cmd, line);
+        return;
+    
+    // 
+    }else{
+        parseSpaces(cmd, line);
+        return;
     }
 }
 
