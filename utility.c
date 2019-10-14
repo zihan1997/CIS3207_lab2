@@ -230,9 +230,9 @@ void input_output_redirection(command* cmd, char* line){
     if(saveptr != NULL){
         if(*(saveptr) == '>'){
             saveptr+=1;
-            cmd->one->outputMod = 2;
+            cmd->outputMod = 2;
         }else{
-            cmd->one->outputMod = 1;
+            cmd->outputMod = 1;
         }
         // printf("outfile: %s\n", saveptr);
         cmd->one->file = strdup(saveptr);
