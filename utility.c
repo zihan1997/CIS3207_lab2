@@ -190,6 +190,8 @@ void output_redirection(command* cmd, char* line){
         if(*saveptr == '>'){
             cmd->outputMod = 2;
             saveptr = saveptr+1;
+        }else{
+            cmd->outputMod = 1;
         }
         // printf("saveptr: %s\n", saveptr);
         while(*saveptr == ' '){
