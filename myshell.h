@@ -16,8 +16,13 @@ struct commandLine
 };
 typedef struct commandLine command;
 
-extern char* environ[];
+// myshell.c
+int runInternalCmd(command* cmd);
+void build_fork(command* cmd);
+void executeSingleCommand(command* cmd);
+void run_shell(command* cmd);
 
+// utility.c
 void initialize(command* cmd);
 void freeStruct(command* cmd);
 void printCommand(command* cmd);
@@ -31,11 +36,11 @@ void parseLine(command* cmd, char* line);
 void mycd(command* cmd);
 void my_clr();
 void my_dir(command* cmd);
-void my_environ(command* cmd);
+void my_environ();
 void my_echo(command* cmd);
 void my_help();
 void my_pause();
-void my_quit();
+extern void my_quit();
 
 
 
