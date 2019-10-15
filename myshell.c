@@ -38,7 +38,7 @@ int main(int argc, char const *argv[], char* envp[])
             
         // }
         if(batch == stdin){
-            printf("The line is: %s\n", line);
+            // printf("The line is: %s\n", line);
             printf("myshell> ");
         }
         int len = getline(&line, &size, batch);
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[], char* envp[])
             }
             parseLine(&cmd, line);
             if( strcmp(cmd.arg[0], "quit") == 0 ){
-                printf("Break;\n");
+                // printf("Break;\n");
                 flag = 0;
                 break;
             } 
@@ -182,9 +182,9 @@ void executeSingleCommand(command* cmd){
                 }
             }
             if(runInternalCmd(cmd) == 1){
-                return;
+                exit(EXIT_SUCCESS);
             }
-            execvp(cmd->arg[0], cmd->arg);
+            exit(execvp(cmd->arg[0], cmd->arg));
         }
 
     }
@@ -231,11 +231,15 @@ void run_shell(command* cmd){
                     close(pfds[1]);
                     // execlp("wc", "wc", "-l", NULL);
                     execvp(cmd->one->arg[0], cmd->one->arg);
+                    return;
                     // executeSingleCommand(cmd->one);
                 }
             }
         }
-    }else{
+    }else if(cmd->parallel != 0){
+        printf("parallel\n");
+    }
+    else{
         // printf("single\n");
         executeSingleCommand(cmd);
     }
