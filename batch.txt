@@ -1,0 +1,6 @@
+ls
+ps
+cd 1
+ls
+cd ..
+quit
