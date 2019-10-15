@@ -1,7 +1,7 @@
 // struct to read a line
 struct commandLine{
     char* commandName;
-    char** arg; // all arguments
+    char* arg[100]; // all arguments
     int argCount; // the number of arguments
     char* file; 
     int inputMod;  // < or << read in
