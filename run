@@ -1,0 +1,16 @@
+In the assignment: myshell
+I learned to implement basic commands that is built-in shell like bash. In addition,
+I also learned the basic rules of forking threads, redirections, parallel process,
+and background process. I meet few issues while building my shell.
+
+1. When I build cd, I accidentally put code in child process. It causes PWD is
+    not changed with cd. 
+2. When I build pipe, every time I have pipe command, it will exit without typing 
+    exit command. This is because I put exec func in parent part. In the first try,
+    I made a second fork in parent block. It turns out that nothing written on the 
+    screen. In the second try, I did fork only with exec, the one line. While I tested
+    screen is in a endless loop showing "line < 1". It fails again.
+3. When I typed "quit" on screen, I had to type twice to exit. After debugging, I 
+    found that I did not kill the child process, it went to the main func. What
+    I did is right after the exec, I put exit to kill the child process. Then, 
+    the quit works fine.
