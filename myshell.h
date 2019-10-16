@@ -17,9 +17,11 @@ struct commandLine
 typedef struct commandLine command;
 
 // myshell.c
+char* get_current_dirname();
 int runInternalCmd(command* cmd);
 void build_fork(command* cmd);
 void executeSingleCommand(command* cmd);
+void run_pipe(command* cmd);
 void run_shell(command* cmd);
 
 // utility.c
