@@ -35,7 +35,7 @@ int main(int argc, char const *argv[], char* envp[])
     while(flag == 1){
         
         if(batch == stdin){
-            printf("myshell@%s> ", get_current_dirname(PWD));
+            printf("myshell:%s> ", get_current_dirname(PWD));
         }        
         int len = getline(&line, &size, batch);
         if(len > 0){
@@ -195,57 +195,50 @@ void executeSingleCommand(command* cmd){
     }
     
 }
-void run_shell(command* cmd){
-    if(cmd->background != 0){
-        printf("background\n");
-        pid_t childPID = fork();
-        if(childPID < 0){
-            printf("fork failed\n");
-            return;
-        }
-        // parent
-        if(childPID != 0){
-            return;
-        }else{ // child
-            executeSingleCommand(cmd);
-        }
-    }else if(cmd->pipe != 0){
-        // printf("pipe\n");
-        // make sure there are two commands
-        if(cmd->one != NULL){
-            int pfds[2];
-            // create pipe
-            if(pipe(pfds) == 0){
-                // child
-                if(fork() == 0){
-                    // close stdout
-                    close(1);
-                    // write into pipe
-                    dup2(pfds[1], STDOUT_FILENO);
-                    close(pfds[0]);
-                    // execlp("ls", "ls", "-1", NULL);
-                    execvp(cmd->arg[0], cmd->arg);
-                    // executeSingleCommand(cmd);
-                }else{
-                    // parent
-
-                    // close stdin
-                    close(0);
-                    // write stdin into pipe
-                    dup2(pfds[0], STDIN_FILENO);
-                    close(pfds[1]);
-                    // execlp("wc", "wc", "-l", NULL);
-                    execvp(cmd->one->arg[0], cmd->one->arg);
-                    return;
-                    // executeSingleCommand(cmd->one);
-                }
-            }
-        }
-    }else if(cmd->parallel != 0){
-        printf("parallel\n");
+void run_pipe(command* cmd){
+    if(cmd->one == NULL){
+        perror("only one command. Cannot pipe");
+        return;
     }
-    else{
-        // printf("single\n");
+    int pfds[2];
+    // create pipe
+    if(pipe(pfds) == 0){
+        // child
+        if(fork() == 0){
+            // close stdout
+            close(1);
+            // write into pipe
+            dup2(pfds[1], STDOUT_FILENO);
+            close(pfds[0]);
+            // execlp("ls", "ls", "-1", NULL);
+            execvp(cmd->arg[0], cmd->arg);
+            exit(EXIT_SUCCESS);
+            // executeSingleCommand(cmd);
+        }else{
+            // parent
+
+            // close stdin
+            close(0);
+            // write stdin into pipe
+            dup2(pfds[0], STDIN_FILENO);
+            close(pfds[1]);
+            // execlp("wc", "wc", "-l", NULL);
+            execvp(cmd->one->arg[0], cmd->one->arg);
+            return;
+            // executeSingleCommand(cmd->one);
+        }
+    }
+}
+void run_shell(command* cmd){
+    if(cmd->background || cmd->parallel){
+        while(cmd){
+            build_fork(cmd);
+            cmd = cmd->one;
+        }
+    }
+    if(cmd->pipe){
+        run_pipe(cmd);
+    }else{
         executeSingleCommand(cmd);
     }
 }
