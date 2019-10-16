@@ -302,18 +302,9 @@ void parseLine(command* cmd, char* line){
     }
 }
 
-// check if the dir is absolute or relative
-int checkDir(char* path){
-    if( strncmp( path, "/", 1) == 0 || strncmp(path, "./", 2) == 0 || 
-                                            strncmp(path, "../", 3) == 0 ){
-        return 1;
-    }
-    return 0;
-}
-
 void my_cd(command* cmd){
     // get current dir
-    char PWD[PATH_MAX];
+    static char PWD[PATH_MAX];
     getcwd(PWD, sizeof(PWD));
 
     // check how many arguments 
@@ -326,22 +317,14 @@ void my_cd(command* cmd){
         puts(PWD);
         return;
     }
-    if( checkDir(cmd->arg[1])){ // absolute path
-        if (chdir(cmd->arg[1]) != 0){ 
-            printf("Unsuccessful go to the dirctory:%s.\n", cmd->arg[1]);
-            return;
-        }
+    if (chdir(cmd->arg[1]) == 0){
+        getcwd(PWD, sizeof(PWD));
+        setenv("PWD", PWD, 1);
+        // printf("Successful!\n%s\n", PWD);
     }else{
-        strcat(PWD, "/");
-        strcat(PWD, cmd->arg[1]);
-    
-        if (chdir(PWD) != 0){ 
-            printf("Unsuccessful go to the dirctory:%s.\n", PWD);
-            return;
-        }
+        puts("failed to chdir");
     }
-    // getcwd(PWD, sizeof(PWD));
-    // printf("Successful!\n%s\n", PWD);
+    
 }
 void my_clr(){
     printf("\033[H\033[2J");
