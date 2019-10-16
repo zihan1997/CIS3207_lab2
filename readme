@@ -9,8 +9,7 @@ Description:
     Batch Mode:
         Shell reads file which contains multiple lines of commands, 
             and should be able to execute each command
-    Command:
-        Internal commands:
+    Internal commands:
             a. cd <directory> - Change the current default directory to <directory>. 
                 If the <directory> argument is not present, report the current directory. 
                 If the directory does not exist an appropriate error should be reported. 
@@ -31,4 +30,29 @@ Description:
                 full path for the shell executable(not a hardwired path
                 back to your directory, but the one from which it was
                 executed).
+    I/O Redirections:
+        myshell supports on either or both stdin and/or stdout. The command line
         
+            programname arg1 arg2 < inputfile > outfile
+        
+        will execute the program programname with arguments arg1 and arg2, 
+        the stdin FILE stream replaced by inputfile and the stdout FILE 
+        stream replaced by outputfile.
+        
+        stdout redirection should also be possible for the internal commands 
+        
+            dir, environ, echo, & help.
+
+        With output redirection, if the redirection character is > then the 
+        outputfile is created if it does not exist and truncated if it does. 
+        If the redirection token is >> then outputfile is created if it does 
+        not exist and appended to if it does.
+    Background programs:
+        An ampersand (&) at the end of the command line indicates that the shell 
+        should return to the command line prompt immediately after launching that 
+        program.
+    Pipes:
+        Several commands are strung together
+        command1 arg1 | command2 arg2
+    Path Environment:
+        Path environment contains path to find myshell
