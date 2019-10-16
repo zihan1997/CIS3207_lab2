@@ -6,12 +6,11 @@
 
 int main(int argc, char const *argv[], char* envp[])
 {
-    // 1, get current dir
-    environ = envp;
+    // 1. get current dir
     char PWD[PATH_MAX];
     if(getcwd(PWD, sizeof(PWD)) == NULL){
         perror("cannot get current dir");
-        return 1;
+        return EXIT_FAILURE;
     }
     // 2. set shell environment
     setenv("shell", PWD, 1);
@@ -34,13 +33,10 @@ int main(int argc, char const *argv[], char* envp[])
     }
     int flag = 1;
     while(flag == 1){
-        // if(getcwd(PWD, sizeof(PWD)) != NULL){
-            
-        // }
+        
         if(batch == stdin){
-            // printf("The line is: %s\n", line);
-            printf("myshell> ");
-        }
+            printf("myshell@%s> ", get_current_dirname(PWD));
+        }        
         int len = getline(&line, &size, batch);
         if(len > 0){
             // remove \n or \r at the end
@@ -69,7 +65,16 @@ int main(int argc, char const *argv[], char* envp[])
     freeStruct(&cmd);
     return 0;
 }
-
+char* get_current_dirname(){
+    char* pwd = getcwd(NULL, 0);
+    char* saveptr;
+    char* token = strtok_r(pwd, "/", &saveptr);
+    while(saveptr != NULL){
+        token = strtok_r(NULL, "/", &saveptr);
+    }
+    return token;
+    
+}
 // single internal commands
 int runInternalCmd(command* cmd){
     // copy the command name to cmdName
@@ -136,6 +141,9 @@ void executeSingleCommand(command* cmd){
         // parent process
         if(childPID != 0){
             waitpid(childPID, 0, 0);
+            if(runInternalCmd(cmd) == 1){
+                return;
+            }
             return;
         }else{
             // do execvp
@@ -180,9 +188,6 @@ void executeSingleCommand(command* cmd){
                     dup2(fd, STDOUT_FILENO);
                     // execvp(cmd->arg[0], cmd->arg);
                 }
-            }
-            if(runInternalCmd(cmd) == 1){
-                exit(EXIT_SUCCESS);
             }
             exit(execvp(cmd->arg[0], cmd->arg));
         }
@@ -261,11 +266,12 @@ int main(int argc, char const *argv[], char* envp[])
     // char line[100] = "ls -l|wc -l";
     // char line[100] = "ps|grep root";
     // char line[100] = "wc<pseudocode.txt>>a.txt";
-    char line[100] = "echo me>a.txt";
+    char line[100] = "cd 1";
     parseLine(&cmd, line);
     printCommand(&cmd);
     // executeSingleCommand(&cmd);
-    run_shell(&cmd);
+    // run_shell(&cmd);
+    my_cd(&cmd);
     return 0;
 }
 */
