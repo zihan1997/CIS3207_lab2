@@ -388,8 +388,14 @@ void my_echo(command* cmd){
     }
 }
 void my_help(){
-    char* filename = "/Users/Zihan1997/Documents/Temple CS Class/CIS-3207/Proj2/readme";
-    FILE* fptr = fopen(filename, "r");
+    char PWD[PATH_MAX];
+    if(getcwd(PWD, sizeof(PWD)) == NULL){
+        perror("cannot get current dir");
+        return;
+    }
+    strcat(PWD, "/readme");
+    FILE* fptr = fopen(PWD, "r");
+
     char c;
     c = fgetc(fptr);
     while(c != EOF){
@@ -422,3 +428,10 @@ void my_quit(){
 //     my_environ(&cmd);
 //     return 0;
 // }
+
+int main(int argc, char const *argv[])
+{
+    my_help();
+    return 0;
+}
+
