@@ -103,10 +103,10 @@ int runInternalCmd(command* cmd){
     }else if(strcmp(cmdName, "pause") == 0){
         my_pause();
         return 1;
-    // }else if(strcmp(cmdName, "quit") == 0){
-    //     // free(cmd);
-    //     my_quit();
-    //     return 1;
+    }else if(strcmp(cmdName, "quit") == 0){
+        // free(cmd);
+        my_quit();
+        return 1;
     }else{
         // not internal commands
         return 0;
