@@ -381,7 +381,8 @@ void my_echo(command* cmd){
         // print out spaces in the line
         puts("");
     }else{
-        for(int i = 1; i <= cmd->argc && cmd->arg[i] != NULL; i++){
+        // puts("echo with argu");
+        for(int i = 1; i < cmd->argc && cmd->arg[i] != NULL; i++){
             printf("%s ", cmd->arg[i]);
         }
         printf("\n");
@@ -418,20 +419,12 @@ void my_quit(){
 
 // int main(int argc, char const *argv[])
 // {
-//     // getchar();
-//     // my_quit();
-//     // getchar();
-//     command cmd;
-//     initialize(&cmd);
-//     char line[100] = "cd ..";
-//     parseSpaces(&cmd, line);
-//     my_environ(&cmd);
+//     command one ;
+//     initialize(&one);
+//     char cmd[10] = "dir";
+//     parseLine(&one, cmd);
+//     printCommand(&one);
+//     my_dir(&one);
 //     return 0;
 // }
-
-int main(int argc, char const *argv[])
-{
-    my_help();
-    return 0;
-}
 
