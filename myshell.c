@@ -105,6 +105,7 @@ int runInternalCmd(command* cmd){
         return 1;
     }else if(strcmp(cmdName, "quit") == 0){
         // free(cmd);
+        
         my_quit();
         return 1;
     }else{
